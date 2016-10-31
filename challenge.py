@@ -1,9 +1,9 @@
+# !/usr/bin/python
 # njerig
 # CODE2040 Challenge
 
-import json
-import urllib
 import requests
+import ast
 
 
 def main():
@@ -12,8 +12,7 @@ def main():
 
     step_one(token, base_url+'register/')
     step_two(token, base_url+'reverse/')
-
-    #step3
+    step_three(token)
     #step4
 
 def step_one(token, url):
@@ -30,6 +29,20 @@ def step_two(token, url):
     r_string = the_string[::-1]
 
     p_two = requests.post(url+'validate/', {'token': token, 'string': r_string})
+    result = p_two.text
+    print(result)
+    return(result)
+
+def step_three(token):
+    p_one = requests.post('http://challenge.code2040.org/api/haystack', {'token': token})
+    d = ast.literal_eval(p_one.text)
+
+    needle = d['needle']
+    haystack = d['haystack']
+    if needle in haystack:
+        index = haystack.index(needle)
+
+    p_two = requests.post('http://challenge.code2040.org/api/haystack/validate', {'token': token, 'needle': index})
     result = p_two.text
     print(result)
     return(result)
