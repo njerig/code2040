@@ -3,39 +3,40 @@
 # CODE2040 Challenge
 
 import requests
-import ast
-import json
-
+import datetime
+from datetime import timedelta
+import dateutil.parser
 
 def main():
     token = 'a272e0e398eaa14ddeeaaf9cdc21d55d'
     base_url = 'http://challenge.code2040.org/api/'
+    headers = {'content-type': 'application/json'}
 
-    #step_one(token, base_url+'register/')
-    #step_two(token, base_url+'reverse/')
-    #step_three(token, base_url+'haystack/')
-    step_four(token, base_url+'prefix/')
-    #step_five(token)
+    #step_one(token, base_url+'register/', headers)
+    #step_two(token, base_url+'reverse/', headers)
+    #step_three(token, base_url+'haystack/', headers)
+    step_four(token, base_url+'prefix/', headers)
+    #step_five(token, base_url+'dating/', headers)
 
-def step_one(token, url):
-	p = requests.post(url, data={'token': token, 'github': 'https://github.com/njerig/code2040.git'})
+def step_one(token, url, headers):
+	p = requests.post(url, json={'token': token, 'github': 'https://github.com/njerig/code2040.git'}, headers=headers)
 	result = p.text
 	print(result)
 	return result
 
-def step_two(token, url):
-    p_one = requests.post(url, data={'token': token})
+def step_two(token, url, headers):
+    p_one = requests.post(url, json={'token': token}, headers=headers)
 
     the_string = p_one.text
     r_string = the_string[::-1]
 
-    p_two = requests.post(url+'validate/', data={'token': token, 'string': r_string})
+    p_two = requests.post(url+'validate/', json={'token': token, 'string': r_string}, headers=headers)
     result = p_two.text
     print(result)
     return(result)
 
-def step_three(token, url):
-    p_one = requests.post(url, data={'token': token})
+def step_three(token, url, headers):
+    p_one = requests.post(url, json={'token': token}, headers=headers)
     d = ast.literal_eval(p_one.text)
 
     needle = d['needle']
@@ -43,22 +44,15 @@ def step_three(token, url):
     if needle in haystack:
         index = haystack.index(needle)
 
-    p_two = requests.post(url+'validate/', data={'token': token, 'needle': index})
+    p_two = requests.post(url+'validate/', json={'token': token, 'needle': index}, headers=headers)
     result = p_two.text
     print(result)
     return(result)
 
-def step_four(token, url):
-    p_one = requests.post(url, {'token': token})
-    '''
-    print(p_one.text)
-    print('\n')
-    '''
+def step_four(token, url, headers):
+    headers = {'content-type': 'application/json'}
+    p_one = requests.post(url, json = {'token': token}, headers = headers)
     d = p_one.json()
-    '''
-    print(d)
-    print('\n')
-    '''
 
     array = d['array']
     prefix = d['prefix']
@@ -66,21 +60,29 @@ def step_four(token, url):
     for gibberish in array:
         if not gibberish.startswith(prefix):
             doesnt.append(gibberish)
-    '''
-    print(doesnt)
-    print('\n')
-    '''
 
-    p_two = requests.post(url+'validate/', data=json.dumps({'token': token, 'array': doesnt}))
-    result = p_two.text
+    p_two = requests.post(url+'validate/', json={'token': token, 'array': doesnt}, headers=headers)
     print(p_two.status_code)
-    print(result)
-    return(result)
+    print(p_two.text)
+    return(p_two.text)
 
-def step_five(token):
-    p_one = requests.post('http://challenge.code2040.org/api/dating', {'token': token})
-    d = ast.literal_eval(p_one.text)
+def step_five(token, url, headers):
+    p_one = requests.post(url, json={'token': token}, headers=headers)
+    d = p_one.json()
+    datestamp = d['datestamp']
+    interval = d['interval']
     print(d)
+
+    int_date = dateutil.parser.parse(datestamp)
+    print('date: '+ str(int_date))
+    print('interval: '+str(interval))
+    new_date = int_date + datetime.timedelta(seconds=interval)
+    print(new_date)
+    new_date = new_date.isoformat()
+
+    p_two = requests.post(url+'validate/', json={'token': token, 'datestamp': new_date}, headers=headers)
+    print(p_two.status_code)
+    print(p_two.text)
 
 if __name__ == '__main__':
     main()
