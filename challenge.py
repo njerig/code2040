@@ -15,8 +15,8 @@ def main():
     #step_one(token, base_url+'register/', headers)
     #step_two(token, base_url+'reverse/', headers)
     #step_three(token, base_url+'haystack/', headers)
-    step_four(token, base_url+'prefix/', headers)
-    #step_five(token, base_url+'dating/', headers)
+    #step_four(token, base_url+'prefix/', headers)
+    step_five(token, base_url+'dating/', headers)
 
 def step_one(token, url, headers):
 	p = requests.post(url, json={'token': token, 'github': 'https://github.com/njerig/code2040.git'}, headers=headers)
@@ -73,12 +73,13 @@ def step_five(token, url, headers):
     interval = d['interval']
     print(d)
 
-    int_date = dateutil.parser.parse(datestamp)
-    print('date: '+ str(int_date))
+    init_date = dateutil.parser.parse(datestamp)
+    print('date: '+ str(init_date))
     print('interval: '+str(interval))
-    new_date = int_date + datetime.timedelta(seconds=interval)
+    new_date = init_date + datetime.timedelta(seconds=interval)
     print(new_date)
-    new_date = new_date.isoformat()
+    new_date = str(new_date.isoformat())[:-6] + 'Z'
+    print(new_date)
 
     p_two = requests.post(url+'validate/', json={'token': token, 'datestamp': new_date}, headers=headers)
     print(p_two.status_code)
